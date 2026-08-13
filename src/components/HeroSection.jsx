@@ -4,9 +4,9 @@ import confetti from 'canvas-confetti';
 import { Play, RotateCcw, Award, Sparkles, ChevronDown, CheckCircle2, Trophy, Target, Clock, Settings, ArrowUpRight } from 'lucide-react';
 
 import ladderImg from '../assets/brochure/ladder.png';
-import climbingChildImg from '../assets/brochure/climbing_child.png';
+import prakashClimbingImg from '../assets/brochure/prakash_climbing.png';
+import girlTopImg from '../assets/brochure/girl_top.png';
 import leftStudentsImg from '../assets/brochure/left_students.png';
-import targetBadgeImg from '../assets/brochure/target_badge.png';
 import starDecorImg from '../assets/brochure/star_decor.png';
 
 export default function HeroSection({ isClimbing, setIsClimbing }) {
@@ -221,21 +221,21 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
               <span className="text-[10px] text-vk-dark mt-2 font-bold">Kushalata Se Safalta Tak</span>
             </div>
 
-            {/* STATIONARY ORANGE LADDER & CLIMBING CHILD */}
+            {/* STATIONARY ORANGE LADDER, GIRL ON TOP & CLIMBING PRAKASH (BOY) */}
             <div className="relative h-[440px] sm:h-[500px] w-auto flex items-center justify-center mx-auto">
               
-              {/* TOP TARGET / SAFALTA BADGE */}
+              {/* TOP GIRL AT SAFALTA DESTINATION */}
               <motion.div
-                animate={{ scale: hasCompleted ? [1, 1.15, 1] : [1, 1.04, 1] }}
+                animate={{ scale: hasCompleted ? [1, 1.12, 1] : [1, 1.03, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-6 right-0 z-20 flex flex-col items-center"
+                className="absolute -top-14 right-2 sm:right-4 z-20 flex flex-col items-center"
               >
                 <img
-                  src={targetBadgeImg}
-                  alt="Target Achievement Badge"
-                  className="h-24 sm:h-28 w-auto object-contain drop-shadow-xl"
+                  src={girlTopImg}
+                  alt="Safalta Girl Achiever"
+                  className="h-28 sm:h-36 w-auto object-contain drop-shadow-xl"
                 />
-                <span className="mt-1 px-3 py-1 bg-vk-orange text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-md">
+                <span className="mt-0.5 px-3 py-1 bg-vk-orange text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-md">
                   SAFALTA / SUCCESS
                 </span>
               </motion.div>
@@ -247,12 +247,12 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
                 className="h-full w-auto object-contain drop-shadow-xl select-none"
               />
 
-              {/* INDEPENDENT MOVABLE CLIMBING CHILD CHARACTER */}
+              {/* INDEPENDENT MOVABLE CLIMBING PRAKASH (BOY) */}
               <motion.div
                 className="absolute z-30 pointer-events-none flex flex-col items-center"
                 style={{
                   bottom: '2%',
-                  left: '12%',
+                  left: '10%',
                 }}
                 animate={{
                   x: ladderRungs[stepIndex].x,
@@ -279,8 +279,8 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
                 </AnimatePresence>
 
                 <motion.img
-                  src={climbingChildImg}
-                  alt="Climbing Student Child"
+                  src={prakashClimbingImg}
+                  alt="Prakash Student Climbing"
                   className="h-32 sm:h-44 w-auto object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)]"
                   animate={isClimbing ? { y: [0, -6, 0] } : {}}
                   transition={{ duration: 0.4, repeat: isClimbing ? Infinity : 0 }}
