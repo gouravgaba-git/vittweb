@@ -10,26 +10,23 @@ import PageSwipeControls from './components/PageSwipeControls';
 
 const pageVariants = {
   enter: (direction) => ({
-    y: direction > 0 ? '100%' : '-100%',
-    opacity: 1,
-    zIndex: 2,
+    y: direction > 0 ? '40%' : '-40%',
+    opacity: 0,
   }),
   center: {
     y: '0%',
     opacity: 1,
-    zIndex: 2,
     transition: {
-      y: { type: 'spring', stiffness: 300, damping: 32, mass: 0.7 },
-      opacity: { duration: 0.2 },
+      duration: 0.42,
+      ease: [0.25, 0.1, 0.25, 1.0],
     },
   },
   exit: (direction) => ({
     y: direction < 0 ? '40%' : '-40%',
-    opacity: 0.2,
-    zIndex: 1,
+    opacity: 0,
     transition: {
-      y: { type: 'spring', stiffness: 300, damping: 32, mass: 0.7 },
-      opacity: { duration: 0.35 },
+      duration: 0.38,
+      ease: [0.25, 0.1, 0.25, 1.0],
     },
   }),
 };
@@ -64,7 +61,7 @@ export default function App() {
     setCurrentPage(newPage);
     setTimeout(() => {
       isAnimatingRef.current = false;
-    }, 850);
+    }, 450);
   };
 
   // Mouse wheel scroll snapping in Page Swiping Mode
@@ -153,9 +150,9 @@ export default function App() {
       {/* Main Page Area */}
       <main className="flex-grow w-full h-full relative overflow-hidden">
         {isSwipeMode ? (
-          /* PAGE SWIPING MODE WITH SILKY GPU ANIMATED TRANSITIONS */
+          /* PAGE SWIPING MODE WITH EASE-IN-OUT TRANSITIONS */
           <div className="relative w-full h-screen overflow-hidden">
-            <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
               {currentPage === 0 && (
                 <motion.div
                   key="page-0"
