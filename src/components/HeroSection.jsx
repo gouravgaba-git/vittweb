@@ -215,11 +215,6 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
           {/* CENTER & RIGHT COLUMN: Stationary Orange Ladder, Climbing Child, & Right Vertical Pill (7 Columns) */}
           <div className="lg:col-span-7 relative h-[520px] sm:h-[600px] w-full flex items-center justify-between z-10">
             
-            {/* Vertical Hindi Text along Ladder */}
-            <div className="hidden sm:flex flex-col items-center justify-center text-vk-teal-deep font-extrabold text-sm tracking-widest uppercase writing-mode-vertical rotate-180 select-none">
-              <span className="text-vk-orange font-black text-lg">कुशलता से सफलता तक</span>
-              <span className="text-[10px] text-vk-dark mt-2 font-bold">Kushalata Se Safalta Tak</span>
-            </div>
 
             {/* STATIONARY ORANGE LADDER, GIRL ON TOP & CLIMBING PRAKASH (BOY) */}
             <div className="relative h-[440px] sm:h-[500px] w-auto flex items-center justify-center mx-auto">
