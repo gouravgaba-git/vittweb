@@ -11,34 +11,53 @@ const navLinks = [
   { name: 'Contact Us', href: '#contact' },
 ];
 
-export default function Navigation({ onStartJourney }) {
+export default function Navigation({
+  onStartJourney,
+  currentPage = 0,
+  setCurrentPage,
+  isSwipeMode = true,
+  setIsSwipeMode,
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
+  const pageIdToSection = ['hero', 'story', 'partner', 'activities'];
+
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    if (!isSwipeMode) {
+      const handleScroll = () => {
+        setScrolled(window.scrollY > 20);
 
-      const sections = ['hero', 'story', 'partner', 'activities', 'contact'];
-      const scrollPosition = window.scrollY + 200;
+        const sections = ['hero', 'story', 'partner', 'activities', 'contact'];
+        const scrollPosition = window.scrollY + 200;
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const top = element.offsetTop;
-          const height = element.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(section);
-            break;
+        for (const section of sections) {
+          const element = document.getElementById(section);
+          if (element) {
+            const top = element.offsetTop;
+            const height = element.offsetHeight;
+            if (scrollPosition >= top && scrollPosition < top + height) {
+              setActiveSection(section);
+              break;
+            }
           }
         }
-      }
-    };
+      };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [isSwipeMode]);
+
+  const handleNavClick = (e, index, href) => {
+    if (isSwipeMode && setCurrentPage) {
+      e.preventDefault();
+      // Map index: 0->Hero (0), 1->Story (1), 2->Partner (2), 3->Activities (3), 4->Contact (3)
+      const pageIndex = index >= 4 ? 3 : index;
+      setCurrentPage(pageIndex);
+    }
+  };
 
   return (
     <header
@@ -48,7 +67,11 @@ export default function Navigation({ onStartJourney }) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
-        <a href="#hero" className="flex items-center gap-3 group">
+        <a
+          href="#hero"
+          onClick={(e) => handleNavClick(e, 0, '#hero')}
+          className="flex items-center gap-3 group"
+        >
           <div className="bg-white p-2 rounded-xl shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">
             <img
               src={logoImg}
@@ -68,13 +91,19 @@ export default function Navigation({ onStartJourney }) {
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-1 bg-white/15 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
-          {navLinks.map((link) => {
+          {navLinks.map((link, index) => {
             const sectionId = link.href.replace('#', '');
-            const isActive = activeSection === sectionId;
+            const isActive = isSwipeMode
+              ? (index === 0 && currentPage === 0) ||
+                (index === 1 && currentPage === 1) ||
+                (index === 2 && currentPage === 2) ||
+                (index >= 3 && currentPage === 3)
+              : activeSection === sectionId;
             return (
               <a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, index, link.href)}
                 className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 relative ${
                   isActive
                     ? 'text-white font-extrabold'
@@ -134,11 +163,14 @@ export default function Navigation({ onStartJourney }) {
             className="md:hidden bg-vk-teal-deep/95 border-b border-white/20 backdrop-blur-xl px-4 py-6 space-y-4 text-white"
           >
             <div className="flex flex-col space-y-2">
-              {navLinks.map((link) => (
+              {navLinks.map((link, index) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(e, index, link.href);
+                  }}
                   className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-vk-aqua hover:bg-white/10 hover:text-vk-gold transition-all"
                 >
                   <span>{link.name}</span>
