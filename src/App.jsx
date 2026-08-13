@@ -11,28 +11,25 @@ import PageSwipeControls from './components/PageSwipeControls';
 const pageVariants = {
   enter: (direction) => ({
     y: direction > 0 ? '100%' : '-100%',
-    opacity: 0,
-    scale: 0.95,
-    filter: 'blur(4px)',
+    opacity: 1,
+    zIndex: 2,
   }),
   center: {
-    y: 0,
+    y: '0%',
     opacity: 1,
-    scale: 1,
-    filter: 'blur(0px)',
+    zIndex: 2,
     transition: {
-      duration: 0.65,
-      ease: [0.22, 1, 0.36, 1],
+      y: { type: 'spring', stiffness: 300, damping: 32, mass: 0.7 },
+      opacity: { duration: 0.2 },
     },
   },
   exit: (direction) => ({
-    y: direction < 0 ? '100%' : '-100%',
-    opacity: 0,
-    scale: 0.95,
-    filter: 'blur(4px)',
+    y: direction < 0 ? '40%' : '-40%',
+    opacity: 0.2,
+    zIndex: 1,
     transition: {
-      duration: 0.65,
-      ease: [0.22, 1, 0.36, 1],
+      y: { type: 'spring', stiffness: 300, damping: 32, mass: 0.7 },
+      opacity: { duration: 0.35 },
     },
   }),
 };
@@ -44,7 +41,7 @@ export default function App() {
   const [isSwipeMode, setIsSwipeMode] = useState(true);
 
   const totalPages = 4;
-  const isCooldownRef = useRef(false);
+  const isAnimatingRef = useRef(false);
   const touchStartY = useRef(0);
 
   // Trigger child climbing journey
@@ -61,9 +58,13 @@ export default function App() {
   };
 
   const changePage = (newPage) => {
-    if (newPage < 0 || newPage >= totalPages || newPage === currentPage) return;
+    if (newPage < 0 || newPage >= totalPages || newPage === currentPage || isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
     setDirection(newPage > currentPage ? 1 : -1);
     setCurrentPage(newPage);
+    setTimeout(() => {
+      isAnimatingRef.current = false;
+    }, 850);
   };
 
   // Mouse wheel scroll snapping in Page Swiping Mode
@@ -72,18 +73,14 @@ export default function App() {
 
     const handleWheel = (e) => {
       // Don't intercept scroll if inside a lightbox or nested modal
-      if (e.target.closest('.no-swipe') || isCooldownRef.current) return;
+      if (e.target.closest('.no-swipe') || isAnimatingRef.current) return;
 
-      if (Math.abs(e.deltaY) > 25) {
-        isCooldownRef.current = true;
+      if (Math.abs(e.deltaY) > 20) {
         if (e.deltaY > 0) {
           changePage(currentPage + 1);
         } else {
           changePage(currentPage - 1);
         }
-        setTimeout(() => {
-          isCooldownRef.current = false;
-        }, 750);
       }
     };
 
@@ -98,20 +95,16 @@ export default function App() {
   };
 
   const handleTouchEnd = (e) => {
-    if (!isSwipeMode || isCooldownRef.current) return;
+    if (!isSwipeMode || isAnimatingRef.current) return;
     const touchEndY = e.changedTouches[0].clientY;
     const diffY = touchStartY.current - touchEndY;
 
-    if (Math.abs(diffY) > 45) {
-      isCooldownRef.current = true;
+    if (Math.abs(diffY) > 40) {
       if (diffY > 0) {
         changePage(currentPage + 1);
       } else {
         changePage(currentPage - 1);
       }
-      setTimeout(() => {
-        isCooldownRef.current = false;
-      }, 700);
     }
   };
 
@@ -160,9 +153,9 @@ export default function App() {
       {/* Main Page Area */}
       <main className="flex-grow w-full h-full relative overflow-hidden">
         {isSwipeMode ? (
-          /* PAGE SWIPING MODE WITH 3D ANIMATED TRANSITIONS */
+          /* PAGE SWIPING MODE WITH SILKY GPU ANIMATED TRANSITIONS */
           <div className="relative w-full h-screen overflow-hidden">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
+            <AnimatePresence initial={false} custom={direction} mode="popLayout">
               {currentPage === 0 && (
                 <motion.div
                   key="page-0"
@@ -171,7 +164,7 @@ export default function App() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16"
+                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16 will-change-transform transform-gpu"
                 >
                   <HeroSection isClimbing={isClimbing} setIsClimbing={setIsClimbing} />
                 </motion.div>
@@ -185,7 +178,7 @@ export default function App() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16"
+                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16 will-change-transform transform-gpu"
                 >
                   <StorySection />
                 </motion.div>
@@ -199,7 +192,7 @@ export default function App() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16"
+                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16 will-change-transform transform-gpu"
                 >
                   <PartnerSection />
                 </motion.div>
@@ -213,7 +206,7 @@ export default function App() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16 space-y-12"
+                  className="absolute inset-0 w-full h-full overflow-y-auto pt-16 space-y-12 will-change-transform transform-gpu"
                 >
                   <ActivitiesGallery />
                   <ContactSection />
