@@ -4,11 +4,10 @@ import { Menu, X, Rocket, ChevronRight, Phone, Mail } from 'lucide-react';
 import logoImg from '../assets/brochure/vittkushal_logo.png';
 
 const navLinks = [
-  { name: 'Home', href: '#hero' },
-  { name: 'Story & Purpose', href: '#story' },
-  { name: 'Partner Support', href: '#partner' },
-  { name: 'Activities', href: '#activities' },
-  { name: 'Contact Us', href: '#contact' },
+  { name: 'Home', href: '#hero', page: 0 },
+  { name: 'Story & Purpose', href: '#story', page: 1 },
+  { name: 'Partner Support', href: '#partner', page: 2 },
+  { name: 'Activities', href: '#activities', page: 3 },
 ];
 
 export default function Navigation({
@@ -21,8 +20,6 @@ export default function Navigation({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-
-  const pageIdToSection = ['hero', 'story', 'partner', 'activities'];
 
   useEffect(() => {
     if (!isSwipeMode) {
@@ -50,11 +47,9 @@ export default function Navigation({
     }
   }, [isSwipeMode]);
 
-  const handleNavClick = (e, index, href) => {
+  const handleNavClick = (e, pageIndex, href) => {
     if (isSwipeMode && setCurrentPage) {
       e.preventDefault();
-      // Map index: 0->Hero (0), 1->Story (1), 2->Partner (2), 3->Activities (3), 4->Contact (3)
-      const pageIndex = index >= 4 ? 3 : index;
       setCurrentPage(pageIndex);
     }
   };
@@ -91,19 +86,14 @@ export default function Navigation({
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-1 bg-white/15 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
-          {navLinks.map((link, index) => {
+          {navLinks.map((link) => {
             const sectionId = link.href.replace('#', '');
-            const isActive = isSwipeMode
-              ? (index === 0 && currentPage === 0) ||
-                (index === 1 && currentPage === 1) ||
-                (index === 2 && currentPage === 2) ||
-                (index >= 3 && currentPage === 3)
-              : activeSection === sectionId;
+            const isActive = isSwipeMode ? currentPage === link.page : activeSection === sectionId;
             return (
               <a
                 key={link.name}
                 href={link.href}
-                onClick={(e) => handleNavClick(e, index, link.href)}
+                onClick={(e) => handleNavClick(e, link.page, link.href)}
                 className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 relative ${
                   isActive
                     ? 'text-white font-extrabold'
@@ -132,15 +122,16 @@ export default function Navigation({
             <Phone className="w-3.5 h-3.5 text-vk-gold" />
             +91 9811901293
           </a>
-          <button
-            onClick={onStartJourney}
+          <a
+            href="#contact"
+            onClick={(e) => handleNavClick(e, 3, '#contact')}
             className="relative group overflow-hidden rounded-full bg-vk-orange p-px font-bold text-white shadow-glow-orange hover:shadow-lg transition-all active:scale-95"
           >
             <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-vk-orange group-hover:bg-vk-orange/90 transition-all text-xs tracking-wider uppercase">
-              <Rocket className="w-4 h-4 animate-bounce" />
-              Start Journey
+              <Phone className="w-4 h-4" />
+              Contact Us
             </span>
-          </button>
+          </a>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -163,13 +154,13 @@ export default function Navigation({
             className="md:hidden bg-vk-teal-deep/95 border-b border-white/20 backdrop-blur-xl px-4 py-6 space-y-4 text-white"
           >
             <div className="flex flex-col space-y-2">
-              {navLinks.map((link, index) => (
+              {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   onClick={(e) => {
                     setMobileMenuOpen(false);
-                    handleNavClick(e, index, link.href);
+                    handleNavClick(e, link.page, link.href);
                   }}
                   className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-vk-aqua hover:bg-white/10 hover:text-vk-gold transition-all"
                 >
@@ -180,16 +171,17 @@ export default function Navigation({
             </div>
 
             <div className="pt-4 border-t border-white/15 flex flex-col gap-3">
-              <button
-                onClick={() => {
+              <a
+                href="#contact"
+                onClick={(e) => {
                   setMobileMenuOpen(false);
-                  onStartJourney();
+                  handleNavClick(e, 3, '#contact');
                 }}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-vk-orange text-white font-extrabold text-sm shadow-glow-orange"
               >
-                <Rocket className="w-4 h-4" />
-                Start Child Climbing Journey
-              </button>
+                <Phone className="w-4 h-4" />
+                Contact Us
+              </a>
             </div>
           </motion.div>
         )}

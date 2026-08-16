@@ -10,11 +10,11 @@ import PageSwipeControls from './components/PageSwipeControls';
 
 const pageVariants = {
   enter: (direction) => ({
-    y: direction > 0 ? '40%' : '-40%',
-    opacity: 0,
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0.2,
   }),
   center: {
-    y: '0%',
+    x: '0%',
     opacity: 1,
     transition: {
       duration: 0.42,
@@ -22,8 +22,8 @@ const pageVariants = {
     },
   },
   exit: (direction) => ({
-    y: direction < 0 ? '40%' : '-40%',
-    opacity: 0,
+    x: direction < 0 ? '100%' : '-100%',
+    opacity: 0.2,
     transition: {
       duration: 0.38,
       ease: [0.25, 0.1, 0.25, 1.0],
@@ -39,6 +39,7 @@ export default function App() {
 
   const totalPages = 4;
   const isAnimatingRef = useRef(false);
+  const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
   // Trigger child climbing journey
@@ -64,20 +65,18 @@ export default function App() {
     }, 450);
   };
 
-  // Mouse wheel scroll snapping in Page Swiping Mode
+  // Horizontal trackpad wheel scrolling (vertical mouse wheel page snapping disabled for smooth page reading)
   useEffect(() => {
     if (!isSwipeMode) return;
 
     const handleWheel = (e) => {
-      // Don't intercept scroll if inside a lightbox or nested modal
-      if (e.target.closest('.no-swipe') || isAnimatingRef.current) return;
+      // Only process explicit horizontal trackpad tilt/scroll (deltaX)
+      if (e.target.closest('.no-swipe') || isAnimatingRef.current || Math.abs(e.deltaX) < 25) return;
 
-      if (Math.abs(e.deltaY) > 20) {
-        if (e.deltaY > 0) {
-          changePage(currentPage + 1);
-        } else {
-          changePage(currentPage - 1);
-        }
+      if (e.deltaX > 0) {
+        changePage(currentPage + 1);
+      } else if (e.deltaX < 0) {
+        changePage(currentPage - 1);
       }
     };
 
@@ -85,19 +84,23 @@ export default function App() {
     return () => window.removeEventListener('wheel', handleWheel);
   }, [currentPage, isSwipeMode]);
 
-  // Touch Swipe gestures for Mobile / Tablet
+  // Touch Swipe gestures (Only horizontal left/right drag for page turning)
   const handleTouchStart = (e) => {
     if (!isSwipeMode) return;
+    touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
     if (!isSwipeMode || isAnimatingRef.current) return;
+    const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - touchEndX;
     const diffY = touchStartY.current - touchEndY;
 
-    if (Math.abs(diffY) > 40) {
-      if (diffY > 0) {
+    // Only allow explicit horizontal swipe (when horizontal movement dominates vertical scroll)
+    if (Math.abs(diffX) > Math.abs(diffY) * 1.5 && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
         changePage(currentPage + 1);
       } else {
         changePage(currentPage - 1);
@@ -105,15 +108,20 @@ export default function App() {
     }
   };
 
-  // Keyboard navigation (Up/Down Arrow keys, Space, PageUp/PageDown)
+  // Keyboard navigation (ArrowRight/Left, ArrowUp/Down, Space, PageUp/PageDown)
   useEffect(() => {
     if (!isSwipeMode) return;
 
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.target.matches('input, textarea'))) {
+      if (
+        e.key === 'ArrowRight' ||
+        e.key === 'ArrowDown' ||
+        e.key === 'PageDown' ||
+        (e.key === ' ' && !e.target.matches('input, textarea'))
+      ) {
         e.preventDefault();
         changePage(currentPage + 1);
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault();
         changePage(currentPage - 1);
       }
@@ -163,7 +171,7 @@ export default function App() {
                   exit="exit"
                   className="absolute inset-0 w-full h-full overflow-y-auto pt-16 will-change-transform transform-gpu"
                 >
-                  <HeroSection isClimbing={isClimbing} setIsClimbing={setIsClimbing} />
+                  <HeroSection isClimbing={isClimbing} setIsClimbing={setIsClimbing} onNextPage={() => changePage(1)} />
                 </motion.div>
               )}
 
@@ -214,7 +222,7 @@ export default function App() {
         ) : (
           /* STANDARD CONTINUOUS SCROLL MODE */
           <div className="pt-16 space-y-4">
-            <HeroSection isClimbing={isClimbing} setIsClimbing={setIsClimbing} />
+            <HeroSection isClimbing={isClimbing} setIsClimbing={setIsClimbing} onNextPage={() => changePage(1)} />
             <StorySection />
             <PartnerSection />
             <ActivitiesGallery />

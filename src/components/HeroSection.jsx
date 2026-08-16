@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Play, RotateCcw, Award, Sparkles, ChevronDown, CheckCircle2, Trophy, Target, Clock, Settings, ArrowUpRight } from 'lucide-react';
+import { Play, RotateCcw, Award, Sparkles, ChevronRight, CheckCircle2, Trophy, Target, Clock, Settings, ArrowUpRight } from 'lucide-react';
 
 import ladderImg from '../assets/brochure/ladder.png';
 import prakashClimbingImg from '../assets/brochure/prakash_climbing.png';
@@ -9,7 +9,19 @@ import girlTopImg from '../assets/brochure/girl_top.png';
 import leftStudentsImg from '../assets/brochure/left_students.png';
 import starDecorImg from '../assets/brochure/star_decor.png';
 
-export default function HeroSection({ isClimbing, setIsClimbing }) {
+// Full ladder rung climbing path coordinates from bottom to top rung
+const ladderRungs = [
+  { x: 0, y: 0, rotation: 0, label: 'Ambition' },
+  { x: 6, y: -55, rotation: 3, label: 'Enrollment' },
+  { x: 12, y: -110, rotation: -3, label: 'Skill Building' },
+  { x: 18, y: -165, rotation: 4, label: 'Practical Accounting' },
+  { x: 24, y: -220, rotation: -4, label: 'Taxation & Finance' },
+  { x: 30, y: -275, rotation: 2, label: 'Internship Training' },
+  { x: 36, y: -330, rotation: -2, label: 'Industry Practice' },
+  { x: 42, y: -390, rotation: 0, label: 'Safalta / Achievement' },
+];
+
+export default function HeroSection({ isClimbing, setIsClimbing, onNextPage }) {
   const [climbProgress, setClimbProgress] = useState(0);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -23,105 +35,49 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
     });
   };
 
-  // Auto-start animation when page loads
+  // Auto-start and continuous automatic climbing loop
   useEffect(() => {
-    const autoStartTimer = setTimeout(() => {
-      setIsClimbing(true);
-    }, 600);
-    return () => clearTimeout(autoStartTimer);
+    setIsClimbing(true);
   }, []);
 
-  const handleStartClimb = () => {
-    setIsClimbing(true);
-    setHasCompleted(false);
-    setClimbProgress(0);
-    setStepIndex(0);
-  };
-
-  const handleResetClimb = () => {
-    setIsClimbing(false);
-    setHasCompleted(false);
-    setClimbProgress(0);
-    setStepIndex(0);
-  };
-
-  // Full ladder rung climbing path coordinates from bottom to top rung
-  const ladderRungs = [
-    { x: 0, y: 0, rotation: 0, label: 'Ambition' },
-    { x: 6, y: -55, rotation: 3, label: 'Enrollment' },
-    { x: 12, y: -110, rotation: -3, label: 'Skill Building' },
-    { x: 18, y: -165, rotation: 4, label: 'Practical Accounting' },
-    { x: 24, y: -220, rotation: -4, label: 'Taxation & Finance' },
-    { x: 30, y: -275, rotation: 2, label: 'Internship Training' },
-    { x: 36, y: -330, rotation: -2, label: 'Industry Practice' },
-    { x: 42, y: -390, rotation: 0, label: 'Safalta / Achievement' },
-  ];
-
   useEffect(() => {
-    if (isClimbing && !hasCompleted) {
-      const interval = setInterval(() => {
+    let interval;
+    if (isClimbing) {
+      interval = setInterval(() => {
         setStepIndex((prev) => {
           if (prev < ladderRungs.length - 1) {
             const nextStep = prev + 1;
             setClimbProgress(Math.round((nextStep / (ladderRungs.length - 1)) * 100));
+            if (nextStep === ladderRungs.length - 1) {
+              setHasCompleted(true);
+              triggerConfetti();
+              // Pause at top for 4 seconds, then automatically restart climb
+              setTimeout(() => {
+                setStepIndex(0);
+                setClimbProgress(0);
+                setHasCompleted(false);
+              }, 4000);
+            }
             return nextStep;
-          } else {
-            clearInterval(interval);
-            setHasCompleted(true);
-            setIsClimbing(false);
-            triggerConfetti();
-            return prev;
           }
+          return prev;
         });
-      }, 800);
-
-      return () => clearInterval(interval);
+      }, 900);
     }
-  }, [isClimbing, hasCompleted]);
+    return () => clearInterval(interval);
+  }, [isClimbing]);
 
   return (
     <section
       id="hero"
-      className="relative min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 bg-brochure-pattern text-vk-dark overflow-hidden flex flex-col justify-between"
+      className="relative min-h-screen pt-20 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-brochure-pattern text-vk-dark overflow-hidden flex flex-col justify-between"
     >
       {/* Decorative Wave Swooshes top & bottom (matching PDF Page 1) */}
       <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-r from-vk-teal-deep via-vk-teal-blue to-vk-mint opacity-90 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto w-full z-10">
-        
-        {/* Top Header Row matching Brochure Layout */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-wrap items-center justify-between gap-4 border-b border-vk-mint/30 pb-6"
-        >
-          {/* Top Tagline & Sub-heading */}
-          <div className="flex items-center gap-3">
-            <span className="inline-block px-3.5 py-1.5 bg-vk-teal-deep text-white text-xs font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-              VittKushal Training & Placement
-            </span>
-            <span className="text-xs text-vk-teal-deep font-bold hidden sm:inline-block">
-              • Kushalta Se Safalta Tak (कुशलता से सफलता तक)
-            </span>
-          </div>
-
-          {/* Top Decorative Icons (Trophy, Target Arrow) */}
-          <div className="flex items-center gap-4 bg-white/80 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-vk-mint/30 shadow-sm">
-            <div className="flex items-center gap-2 text-vk-orange">
-              <Trophy className="w-5 h-5 text-vk-gold animate-bounce" />
-              <span className="text-xs font-bold text-vk-teal-deep uppercase tracking-wider">Goal & Achievement</span>
-            </div>
-            <div className="h-4 w-px bg-vk-mint/40" />
-            <div className="flex items-center gap-1.5 text-vk-teal-blue">
-              <ArrowUpRight className="w-5 h-5 text-vk-teal-deep" />
-              <span className="text-xs font-bold">Career Growth</span>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Page 1 Grid Composition */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-2 sm:mt-4">
           
           {/* LEFT COLUMN: Title, Taglines & Action Trigger (5 Columns) */}
           <motion.div
@@ -130,10 +86,6 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="lg:col-span-5 space-y-6 text-left z-20"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-vk-teal-deep font-bold text-xs shadow-sm border border-vk-mint/30">
-              <Award className="w-4 h-4 text-vk-orange" />
-              <span>Interactive Digital Brochure</span>
-            </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-none text-vk-teal-deep">
               From <span className="text-vk-orange underline decoration-vk-gold decoration-4">Ambition</span>
@@ -146,31 +98,6 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
               We empower students from Tier 2 & Tier 3 towns of Bharat with practical skills in Accounting, Taxation, & Finance.
             </p>
 
-            {/* Interactive Journey Button */}
-            <div className="pt-2 flex flex-wrap items-center gap-4">
-              <button
-                onClick={handleStartClimb}
-                disabled={isClimbing}
-                className={`relative group px-7 py-3.5 rounded-2xl font-extrabold text-sm uppercase tracking-wider flex items-center gap-3 transition-all duration-300 shadow-glow-orange ${
-                  isClimbing
-                    ? 'bg-slate-400 text-white cursor-not-allowed'
-                    : 'bg-vk-orange text-white hover:bg-vk-orange/90 hover:scale-105 active:scale-95'
-                }`}
-              >
-                <Play className={`w-5 h-5 ${isClimbing ? 'animate-spin' : ''}`} />
-                <span>{isClimbing ? 'Child Climbing...' : hasCompleted ? 'Re-Play Journey' : 'Start Journey'}</span>
-              </button>
-
-              {hasCompleted && (
-                <button
-                  onClick={handleResetClimb}
-                  className="px-5 py-3 rounded-2xl bg-white text-vk-teal-deep font-bold text-sm flex items-center gap-2 border border-vk-mint/40 shadow-sm hover:bg-slate-50 transition-all"
-                >
-                  <RotateCcw className="w-4 h-4 text-vk-orange" />
-                  Reset
-                </button>
-              )}
-            </div>
 
             {/* Progress Bar Card */}
             <div className="bg-white/90 border border-vk-mint/30 rounded-2xl p-4 shadow-md max-w-md">
@@ -230,9 +157,11 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
                   alt="Safalta Girl Achiever"
                   className="h-28 sm:h-36 w-auto object-contain drop-shadow-xl"
                 />
-                <span className="mt-0.5 px-3 py-1 bg-vk-orange text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-md">
-                  SAFALTA / SUCCESS
-                </span>
+                {!hasCompleted && (
+                  <span className="mt-0.5 px-3 py-1 bg-vk-orange text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-md">
+                    SAFALTA / SUCCESS
+                  </span>
+                )}
               </motion.div>
 
               {/* STATIONARY LADDER IMAGE */}
@@ -283,33 +212,23 @@ export default function HeroSection({ isClimbing, setIsClimbing }) {
               </motion.div>
             </div>
 
-            {/* FAR RIGHT VERTICAL BROCHURE PILL CARD (Matching PDF Page 1 right panel) */}
-            <div className="hidden xl:flex flex-col items-center justify-center bg-white/90 border border-vk-mint/40 rounded-3xl p-4 shadow-lg text-center max-w-[130px] space-y-4">
-              <div className="p-2 rounded-xl bg-vk-orange/10 text-vk-orange">
-                <Target className="w-6 h-6" />
-              </div>
-              <p className="text-[11px] font-extrabold uppercase text-vk-teal-deep leading-snug tracking-wider">
-                PLEASE HELP OUR STUDENTS TO REACH FROM KUSHALTA SE SAFALTA TAK
-              </p>
-              <div className="w-8 h-1 bg-vk-orange rounded-full" />
-            </div>
 
           </div>
         </div>
 
-        {/* Bottom Scroll Prompt */}
+        {/* Bottom Prompt to Next Page */}
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity }}
+          animate={{ x: [0, 8, 0] }}
+          transition={{ duration: 1.6, repeat: Infinity }}
           className="flex flex-col items-center justify-center pt-8 pb-2"
         >
-          <a
-            href="#story"
-            className="flex items-center gap-2 text-xs font-bold text-vk-teal-deep hover:text-vk-orange transition-colors uppercase tracking-widest"
+          <button
+            onClick={onNextPage}
+            className="flex items-center gap-2 text-xs font-bold text-vk-teal-deep hover:text-vk-orange transition-colors uppercase tracking-widest group"
           >
             <span>Explore The Story Behind Us</span>
-            <ChevronDown className="w-4 h-4 text-vk-orange" />
-          </a>
+            <ChevronRight className="w-4 h-4 text-vk-orange group-hover:translate-x-1 transition-transform" />
+          </button>
         </motion.div>
       </div>
     </section>
